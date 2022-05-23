@@ -1,9 +1,9 @@
 import { getStatuses } from '../../lib/statuses'
 import { Key } from './Key'
-import { useEffect } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { ENTER_TEXT, DELETE_TEXT } from '../../constants/strings'
 import { localeAwareUpperCase } from '../../lib/words'
-// import { VALID_CHARS } from '../../constants/validChars'
+import { VALID_CHARS } from '../../constants/validChars'
 
 type Props = {
   onChar: (value: string) => void
@@ -12,6 +12,8 @@ type Props = {
   solution: string
   guesses: string[]
   isRevealing?: boolean
+  letterSequence: string
+  setLetterSequence: Dispatch<SetStateAction<string>>
 }
 
 export const Keyboard = ({
@@ -21,6 +23,8 @@ export const Keyboard = ({
   solution,
   guesses,
   isRevealing,
+  letterSequence,
+  setLetterSequence,
 }: Props) => {
   const charStatuses = getStatuses(solution, guesses)
 
@@ -42,15 +46,16 @@ export const Keyboard = ({
         onDelete()
       } else {
         const key = localeAwareUpperCase(e.key)
-        // TODO: check this test if the range works with non-english letters
-        if (key.length === 1 && key >= 'A' && key <= 'Z') {
-          onChar(key)
+        const newLetterSequence = letterSequence + key
+        setLetterSequence(newLetterSequence)
+        if (isValidKey(newLetterSequence)) {
+          onChar(newLetterSequence)
+          setLetterSequence('')
+        } else {
+          if (!isValidPrefix(newLetterSequence)) {
+            setLetterSequence(key)
+          }
         }
-        /*
-        if (isValidKey(key)) {
-          onChar(key)
-        }
-        */
       }
     }
     window.addEventListener('keyup', listener)
@@ -107,11 +112,10 @@ export const Keyboard = ({
   )
 }
 
-/*
 export const isValidKey = (key: string) => {
-  if (key.length !== 1) {
-    return false
-  }
   return VALID_CHARS.includes(key)
 }
-*/
+
+const isValidPrefix = (s: string) => {
+  return VALID_CHARS.filter(valid_char => valid_char.indexOf(s) == 0).length > 0
+}

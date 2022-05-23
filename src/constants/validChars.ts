@@ -1,5 +1,5 @@
 export const VALID_CHARS = [
-    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
-    'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-    'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+    'AL', 'AN', 'AR', 'CA', 'CO', 'DE', 'DI', 'EN', 'ER', 'IC', 'IN',
+    'LA', 'LE', 'LI', 'LY', 'MA', 'ME', 'NE', 'NG', 'NT', 'ON', 'OR',
+    'RA', 'RE', 'RI', 'SE', 'SI', 'SS', 'ST', 'TE', 'TI', 'UN',
 ]

@@ -1,8 +1,9 @@
-# 0.000014% - 0.000020% Ngram frequency in 2019, plus "mainmast", "andesite", "cantonal"
+# Roughly 0.000015% - 0.000030% Ngram frequency in 2019
 shifted_words = ["indenter", "medicate", "recoding", "starless", "ringside", "mainmast", "telecast", "tidiness", "andesite", "cantonal", "stringer", "sidereal", "starling", "castrate"]
-shifted_words += ["decanter", "casement", "literati", "maleness", "malarial"]
+shifted_words += ["decanter", "casement", "literati", "maleness", "malarial", "medicare", "testicle"]
+shifted_words += ["semantic", "altering", "deletion"]  # Tutorial words
 
-# 0 - 0.000014% Ngram frequency in 2019, minus "andesite"
+# Roughly 0% - 0.000015% Ngram frequency in 2019
 removed_words = ["leanness", "costless", "resister", "congener", "casemate", "rainless", "distrain", "arrester", "dentinal", "canticle", "remanent", "demerara", "siderite", "cantonal", "dearness", "arcadian"]
 removed_words += ["liniment", "arsenide", "arsenite", "selenite", "conidial", "sternite", "laterite"]
 

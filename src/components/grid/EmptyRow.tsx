@@ -1,3 +1,4 @@
+import { unicodeLength } from '../../lib/words'
 import { Cell } from './Cell'
 
 type Props = {
@@ -5,7 +6,7 @@ type Props = {
 }
 
 export const EmptyRow = ({ solution }: Props) => {
-  const emptyCells = Array.from(Array(solution.length))
+  const emptyCells = Array.from(Array(unicodeLength(solution)))
 
   return (
     <div className="flex justify-center mb-1">

@@ -3,27 +3,13 @@ import { VALID_GUESSES } from '../constants/validGuesses'
 import { WRONG_SPOT_MESSAGE, NOT_CONTAINED_MESSAGE } from '../constants/strings'
 import { getGuessStatuses } from './statuses'
 import { default as GraphemeSplitter } from 'grapheme-splitter'
-// import { isValidKey } from '../components/keyboard/Keyboard'
+import { KEY_CHAR_LENGTH } from '../constants/settings'
 
 export const isWordInWordList = (word: string) => {
   return (
-    WORDS.includes(localeAwareLowerCase(word)) ||
     VALID_GUESSES.includes(localeAwareLowerCase(word))
   )
 }
-
-/*
-export const isWordInWordList = (word: string) => {
-  return (
-    WORDS.includes(localeAwareLowerCase(word)) ||
-    isValidWord(word, solution)
-  )
-}
-
-export const isValidWord = (word: string, solution: string) => {
-  return word.length === solution.length && word.split('').every(isValidKey);
-}
-*/
 
 export const isWinningWord = (word: string, solution: string) => {
   return word === solution
@@ -73,7 +59,17 @@ export const findFirstUnusedReveal = (word: string, guesses: string[], solution:
 }
 
 export const unicodeSplit = (word: string) => {
-  return new GraphemeSplitter().splitGraphemes(word)
+  const graphemes = new GraphemeSplitter().splitGraphemes(word)
+  const res = []
+  for (let i = 0; i < graphemes.length; i++) {
+    const grapheme = graphemes[i]
+    if (i % KEY_CHAR_LENGTH === 0) {
+      res.push(grapheme)
+    } else {
+      res[Math.floor(i / KEY_CHAR_LENGTH)] += grapheme
+    }
+  }
+  return res
 }
 
 export const unicodeLength = (word: string) => {
@@ -120,7 +116,8 @@ export const getWordOfDay = () => {
   const nextDay = new Date(today)
   nextDay.setDate(today.getDate() + 1)
 
-  const solutionAndIndex = getWordBySolutionIndex(index % WORDS.length)
+  const offset = 34
+  const solutionAndIndex = getWordBySolutionIndex((index + offset) % WORDS.length)
 
   return {
     solution: solutionAndIndex.solution,

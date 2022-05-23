@@ -18,6 +18,7 @@ import {
   REVEAL_TIME_MS,
   WELCOME_INFO_MODAL_MS,
   DISCOURAGE_INAPP_BROWSERS,
+  KEY_CHAR_LENGTH,
 } from './constants/settings'
 import {
   isWordInWordList,
@@ -242,7 +243,10 @@ function App() {
 
   const onDelete = () => {
     setCurrentGuess(
-      new GraphemeSplitter().splitGraphemes(currentGuess).slice(0, -2).join('')
+      new GraphemeSplitter()
+        .splitGraphemes(currentGuess)
+        .slice(0, -KEY_CHAR_LENGTH)
+        .join('')
     )
   }
 

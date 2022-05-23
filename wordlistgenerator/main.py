@@ -58,7 +58,7 @@ old_word_list = [word for word in old_word_list if word not in removed_words]
 grapheme_freq = get_grapheme_freq(grapheme_length, old_word_list, grapheme_overlap=False)
 sorted_grapheme_freq = get_sorted_grapheme_freq(grapheme_freq)
 top_graphemes = [grapheme_kv[0] for grapheme_kv in sorted_grapheme_freq[:grapheme_count]]
-print(top_graphemes)
+# print(top_graphemes)
 # print(sorted([grapheme.upper() for grapheme in top_graphemes]))
 
 new_word_list = get_word_list(old_word_list, top_graphemes, grapheme_overlap=False)

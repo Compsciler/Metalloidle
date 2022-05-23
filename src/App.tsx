@@ -143,6 +143,8 @@ function App() {
       : false
   )
 
+  const [letterSequence, setLetterSequence] = useState('')
+
   useEffect(() => {
     // if no game state on load,
     // show the user the how-to info modal
@@ -240,7 +242,7 @@ function App() {
 
   const onDelete = () => {
     setCurrentGuess(
-      new GraphemeSplitter().splitGraphemes(currentGuess).slice(0, -1).join('')
+      new GraphemeSplitter().splitGraphemes(currentGuess).slice(0, -2).join('')
     )
   }
 
@@ -391,6 +393,8 @@ function App() {
           solution={solution}
           guesses={guesses}
           isRevealing={isRevealing}
+          letterSequence={letterSequence}
+          setLetterSequence={setLetterSequence}
         />
         <InfoModal
           isOpen={isInfoModalOpen}

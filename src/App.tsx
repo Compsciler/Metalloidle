@@ -18,7 +18,6 @@ import {
   REVEAL_TIME_MS,
   WELCOME_INFO_MODAL_MS,
   DISCOURAGE_INAPP_BROWSERS,
-  KEY_CHAR_LENGTH,
 } from './constants/settings'
 import {
   isWordInWordList,
@@ -28,6 +27,7 @@ import {
   findFirstUnusedReveal,
   unicodeLength,
   solutionIndex as solutionIndexOfDay,
+  unicodeSplit,
 } from './lib/words'
 import { addStatsForCompletedGame, loadStats } from './lib/stats'
 import {
@@ -242,12 +242,7 @@ function App() {
   }
 
   const onDelete = () => {
-    setCurrentGuess(
-      new GraphemeSplitter()
-        .splitGraphemes(currentGuess)
-        .slice(0, -KEY_CHAR_LENGTH)
-        .join('')
-    )
+    setCurrentGuess(unicodeSplit(currentGuess).slice(0, -1).join(''))
   }
 
   const onEnter = () => {

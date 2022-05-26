@@ -45,6 +45,8 @@ export const Keyboard = ({
       } else if (e.code === 'Backspace') {
         onDelete()
       } else {
+        // TODO: Fix physical keyboard typing
+        /*
         const key = localeAwareUpperCase(e.key)
         const newLetterSequence = letterSequence + key
         setLetterSequence(newLetterSequence)
@@ -56,6 +58,7 @@ export const Keyboard = ({
             setLetterSequence(key)
           }
         }
+        */
       }
     }
     window.addEventListener('keyup', listener)
@@ -67,7 +70,7 @@ export const Keyboard = ({
   return (
     <div>
       <div className="flex justify-center mb-1">
-        {['AL', 'AN', 'AR', 'CA', 'CO', 'DE', 'DI', 'EN', 'ER', 'IC', 'IN'].map((key) => (
+        {['H', 'He', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Si'].map((key) => (
           <Key
             value={key}
             key={key}
@@ -79,7 +82,7 @@ export const Keyboard = ({
         ))}
       </div>
       <div className="flex justify-center mb-1">
-        {['LA', 'LE', 'LI', 'LY', 'MA', 'ME', 'NE', 'NG', 'NT', 'ON', 'OR'].map((key) => (
+        {['P', 'S', 'Cl', 'Ar', 'Ge', 'As', 'Se', 'Br', 'Kr'].map((key) => (
           <Key
             value={key}
             key={key}
@@ -94,7 +97,7 @@ export const Keyboard = ({
         <Key width={65.4} value="ENTER" onClick={onClick} solution={solution}>
           {ENTER_TEXT}
         </Key>
-        {['RA', 'RE', 'RI', 'SE', 'SI', 'SS', 'ST', 'TE', 'TI', 'UN'].map((key) => (
+        {['Sb', 'Te', 'I', 'Xe', 'At', 'Rn'].map((key) => (
           <Key
             value={key}
             key={key}
@@ -112,6 +115,7 @@ export const Keyboard = ({
   )
 }
 
+/*
 export const isValidKey = (key: string) => {
   return VALID_CHARS.includes(key)
 }
@@ -119,3 +123,4 @@ export const isValidKey = (key: string) => {
 const isValidPrefix = (s: string) => {
   return VALID_CHARS.filter(valid_char => valid_char.indexOf(s) == 0).length > 0
 }
+*/

@@ -233,7 +233,7 @@ function App() {
 
   const onChar = (value: string) => {
     if (
-      unicodeLength(`${currentGuess}${value}`) <= solution.length &&
+      unicodeLength(`${currentGuess}${value}`) <= unicodeLength(solution) &&
       guesses.length < MAX_CHALLENGES &&
       !isGameWon
     ) {

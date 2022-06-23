@@ -1,3 +1,3 @@
-export const exampleIds: number[] = [
-    
+export const exampleIds = [
+    0,
 ]

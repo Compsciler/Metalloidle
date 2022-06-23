@@ -61,7 +61,7 @@ export const unicodeSplit = (word: string) => {
   const graphemes = new GraphemeSplitter().splitGraphemes(word)
   const res: string[] = []
   graphemes.map(c => {
-    if (c.toUpperCase() == c) {
+    if (c.toUpperCase() === c) {
       res.push(c)
     } else {
       res[res.length - 1] += c

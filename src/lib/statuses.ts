@@ -1,3 +1,5 @@
+import { KEY_CHAR_LENGTH } from '../constants/settings'
+import { VALID_CHARS } from '../constants/validChars'
 import { unicodeSplit } from './words'
 
 export type CharStatus = 'absent' | 'present' | 'correct'
@@ -10,22 +12,32 @@ export const getStatuses = (
   const splitSolution = unicodeSplit(solution)
 
   guesses.forEach((word) => {
+    const correctIndices = new Array(solution.length).fill(false)
     unicodeSplit(word).forEach((letter, i) => {
-      if (!splitSolution.includes(letter)) {
-        // make status absent
-        return (charObj[letter] = 'absent')
-      }
-
-      if (letter === splitSolution[i]) {
-        //make status correct
-        return (charObj[letter] = 'correct')
-      }
-
-      if (charObj[letter] !== 'correct') {
-        //make status present
-        return (charObj[letter] = 'present')
-      }
+      VALID_CHARS.forEach((validChar) => {
+        if (!splitSolution.includes(letter)) {
+          // make status absent
+          if (validChar.includes(letter)) {
+            return (charObj[validChar] = 'absent')
+          }
+        }
+        if (letter === splitSolution[i]) {
+          correctIndices[i] = true
+        }
+      })
     })
+    outerLoop:
+    for (let i = 0; i < solution.length; i += KEY_CHAR_LENGTH) {
+      let j = i
+      while (j < i + KEY_CHAR_LENGTH) {
+        if (!correctIndices[j]) {
+          continue outerLoop
+        }
+        j++
+      }
+      // make status present
+      charObj[solution.substring(i, j)] = 'correct'
+    }
   })
 
   return charObj

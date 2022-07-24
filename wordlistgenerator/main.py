@@ -1,7 +1,7 @@
 import random
 from collections import Counter
 from jsonfilelist import json_file_to_list, list_to_json_file
-from constants.wordlistmodifications import added_words, shifted_words, removed_words
+from constants.wordlistmodifications import added_words, shifted_words, removed_words, removed_words_after_shuffle
 
 random.seed(0)
 random.seed(random.randrange(random.randrange(10**3)))
@@ -57,6 +57,7 @@ old_word_list_sorted = sorted(old_word_list)
 new_word_list = get_word_list(old_word_list_sorted)
 new_word_list.sort(key=lambda word: old_word_list.index(word.lower()))
 random.shuffle(new_word_list)
+new_word_list = [word for word in new_word_list if word.lower() not in removed_words_after_shuffle]
 new_word_list = move_items_to_back(shifted_words, new_word_list)
 list_to_json_file(new_word_list, new_word_list_file)
 

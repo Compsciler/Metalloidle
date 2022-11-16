@@ -6,7 +6,7 @@ import { default as GraphemeSplitter } from 'grapheme-splitter'
 
 export const isWordInWordList = (word: string) => {
   return (
-    VALID_GUESSES.includes(word)
+    VALID_GUESSES.includes(word) || WORDS.includes(word)
   )
 }
 

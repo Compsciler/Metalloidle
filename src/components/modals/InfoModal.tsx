@@ -15,9 +15,9 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
       </p>
       <br />
       <p className="text-sm text-gray-500 dark:text-gray-300">
-        The word will consist of a sequence of the bigrams (2-letter combinations) 
-        listed on the keyboard. 
-        All valid guesses must be words made from these bigrams as well. 
+        The word will consist of a sequence of the bigrams (2-letter combinations)
+        listed on the keyboard.
+        All valid guesses must be words made from these bigrams as well.
         (If you are on PC, try typing them out!)
       </p>
 

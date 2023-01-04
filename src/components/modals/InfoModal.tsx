@@ -16,11 +16,11 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
       <br />
       <p className="text-sm text-gray-500 dark:text-gray-300">
         The word will consist of a sequence of nonmetal and metalloid
-        elemental symbols from the periodic table. 
-        All valid guesses must be words made from these symbols as well. 
+        elemental symbols from the periodic table.
+        All valid guesses must be words made from these symbols as well.
         (Note: keyboard typing has not yet been implemented on PC.)
       </p>
-      {/* These symbols are all listed on the keyboard.*/} 
+      {/* These symbols are all listed on the keyboard.*/}
 
       <div className="flex justify-center mb-1 mt-4">
         <Cell

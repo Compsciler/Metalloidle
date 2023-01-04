@@ -15,7 +15,8 @@ import {
 } from './constants/strings'
 import {
   MAX_CHALLENGES,
-  REVEAL_TIME_MS,
+  REVEAL_TIME_MS as REVEAL_TIME_MS_NORMAL,
+  REVEAL_TIME_MS_SPEEDRUN,
   WELCOME_INFO_MODAL_MS,
   DISCOURAGE_INAPP_BROWSERS,
 } from './constants/settings'
@@ -44,22 +45,37 @@ import './App.css'
 import { AlertContainer } from './components/alerts/AlertContainer'
 import { useAlert } from './context/AlertContext'
 import { Navbar } from './components/navbar/Navbar'
+import { navigateAndRefresh } from './lib/navigation'
 import { isInAppBrowser } from './lib/browser'
+import { MigrateStatsModal } from './components/modals/MigrateStatsModal'
 
 import scoreService from './services/scores'
 import { generateEmojiGrid, getEmojiTiles } from './lib/share'
 
-import { useMatch } from 'react-router-dom'
+import { useMatch, useNavigate } from 'react-router-dom'
 import { getWordBySolutionIndex } from './lib/words'
 import { exampleIds } from './constants/exampleIds'
+import { WORDS } from './constants/wordlist'
+import { RandomGameText } from './components/gametext/RandomGameText'
+import { StopwatchText } from './components/gametext/StopwatchText'
+import { PromoText } from './components/gametext/PromoText'
 
 function App() {
-  const isPlayingDaily = useMatch('/') !== null
-  const exampleMatch = useMatch('/examples/:id')
+  const navigate = useNavigate()
+  const dailyPath = '/'
+  const examplePath = '/examples/:id'
+  const randomPath = '/random'
+  const isPlayingDaily = useMatch(dailyPath) !== null
+  const exampleMatch = useMatch(examplePath)
+  const randomMatch = useMatch(randomPath)
   const isPlayingExample = exampleMatch !== null
+  const isPlayingRandom = randomMatch !== null
+  const isNotPlayingDaily = isPlayingExample || isPlayingRandom
   let exampleSolution = undefined
   let exampleSolutionIndex = undefined
   let isReturningExampleNotFoundPage = false
+  const [randomId, setRandomId] = useState(-1)
+
   if (exampleMatch) {
     const id = parseInt(exampleMatch.params.id!)
     if (!exampleIds.includes(id)) {
@@ -73,6 +89,10 @@ function App() {
         isReturningExampleNotFoundPage = true
       }
     }
+  } else if (randomMatch) {
+    const exampleSolutionAndIndex = getWordBySolutionIndex(randomId)
+    exampleSolution = exampleSolutionAndIndex.solution
+    exampleSolutionIndex = exampleSolutionAndIndex.solutionIndex
   }
   const solution =
     exampleSolution !== undefined ? exampleSolution : solutionOfDay
@@ -91,7 +111,9 @@ function App() {
   const [isGameWon, setIsGameWon] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
+  const [isMigrateStatsModalOpen, setIsMigrateStatsModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isSolutionTextOpen, setIsSolutionTextOpen] = useState(false)
   const [currentRowClass, setCurrentRowClass] = useState('')
   const [isGameLost, setIsGameLost] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(
@@ -104,12 +126,24 @@ function App() {
   const [isHighContrastMode, setIsHighContrastMode] = useState(
     getStoredIsHighContrastMode()
   )
+  const [isSpeedrunMode, setIsSpeedrunMode] = useState(
+    localStorage.getItem('speedrunMode')
+      ? localStorage.getItem('speedrunMode') === 'on'
+      : false
+  )
+  // To export to other component in future, see https://stackoverflow.com/questions/66727049/exporting-a-state-from-hook-function-to-another-component
+  const REVEAL_TIME_MS = isSpeedrunMode
+    ? REVEAL_TIME_MS_SPEEDRUN
+    : REVEAL_TIME_MS_NORMAL
+
   const [isManualShareText, setIsManualShareText] = useState(
     localStorage.getItem('manualShare')
       ? localStorage.getItem('manualShare') === 'on'
       : false
   )
   const [isRevealing, setIsRevealing] = useState(false)
+  const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
+  const [timeMs, setTimeMs] = useState(0)
 
   const [guessesOfDay, setGuessesOfDay] = useState<string[]>(() => {
     const loaded = loadGameOfDayStateFromLocalStorage()
@@ -126,17 +160,21 @@ function App() {
       if (isPlayingDaily) {
         setGuessesOfDay([])
       }
+      // Reset other game state variables here (if not already reset by useState)
       return []
     }
+    // Load other game state variables here and below
     const gameWasWon = loaded.guesses.includes(solution)
     if (gameWasWon) {
       setIsGameWon(true)
+      setIsSolutionTextOpen(true)
     }
     if (loaded.guesses.length === MAX_CHALLENGES && !gameWasWon) {
       setIsGameLost(true)
       showErrorAlert(CORRECT_WORD_MESSAGE(solution), {
         persist: true,
       })
+      setIsSolutionTextOpen(true)
     }
     return loaded.guesses
   })
@@ -203,6 +241,11 @@ function App() {
     setStoredIsHighContrastMode(isHighContrast)
   }
 
+  const handleSpeedrunMode = (isSpeedrun: boolean) => {
+    setIsSpeedrunMode(isSpeedrun)
+    localStorage.setItem('speedrunMode', isSpeedrun ? 'on' : 'off')
+  }
+
   const handleManualShareText = (isManual: boolean) => {
     setIsManualShareText(isManual)
     localStorage.setItem('manualShare', isManual ? 'on' : 'off')
@@ -222,11 +265,12 @@ function App() {
     saveGameOfDayStateToLocalStorage({ guesses, solution })
   }, [guessesOfDay])
 
+  const isGameComplete = isGameWon || isGameLost
   useEffect(() => {
+    const delayMs = REVEAL_TIME_MS * solution.length
     if (isGameWon) {
       const winMessage =
         WIN_MESSAGES[Math.floor(Math.random() * WIN_MESSAGES.length)]
-      const delayMs = REVEAL_TIME_MS * unicodeLength(solution)
 
       showSuccessAlert(winMessage, {
         delayMs,
@@ -239,7 +283,39 @@ function App() {
         setIsStatsModalOpen(true)
       }, (unicodeLength(solution) + 1) * REVEAL_TIME_MS)
     }
+
+    if (isGameComplete) {
+      setTimeout(() => {
+        setIsSolutionTextOpen(true)
+      }, delayMs)
+    }
   }, [isGameWon, isGameLost, showSuccessAlert])
+
+  useEffect(() => {
+    setIsStopwatchRunning(guesses.length >= 1 && !isGameComplete)
+  }, [guesses, isGameComplete])
+
+  useEffect(() => {
+    const timeIncrementMs = 10
+    let interval: NodeJS.Timeout | null = null
+
+    if (isStopwatchRunning) {
+      interval = setInterval(() => {
+        setTimeMs((timeMs) => timeMs + timeIncrementMs)
+      }, timeIncrementMs)
+    } else if (interval !== null) {
+      clearInterval(interval)
+    }
+    return () => {
+      if (interval !== null) {
+        clearInterval(interval)
+      }
+    }
+  }, [isStopwatchRunning])
+
+  useEffect(() => {
+    setRandomId(Math.floor(Math.random() * WORDS.length))
+  }, [randomMatch])
 
   const onChar = (value: string) => {
     if (
@@ -256,7 +332,10 @@ function App() {
   }
 
   const onEnter = () => {
-    if (isGameWon || isGameLost) {
+    if (isSolutionTextOpen) {
+      if (isPlayingRandom) {
+        navigateAndRefresh(randomPath, navigate)
+      }
       return
     }
 
@@ -296,7 +375,7 @@ function App() {
       setIsRevealing(false)
     }, REVEAL_TIME_MS * unicodeLength(solution))
 
-    const winningWord = isPlayingExample
+    const winningWord = isNotPlayingDaily
       ? isWinningWord(currentGuess, solution)
       : isWinningWordOfDay(currentGuess)
 
@@ -314,7 +393,7 @@ function App() {
       setCurrentGuess('')
 
       if (winningWord) {
-        if (!isPlayingExample) {
+        if (!isNotPlayingDaily) {
           setStats(addStatsForCompletedGame(stats, guesses.length))
         }
         sendScore(
@@ -328,7 +407,7 @@ function App() {
       }
 
       if (guesses.length === MAX_CHALLENGES - 1) {
-        if (!isPlayingExample) {
+        if (!isNotPlayingDaily) {
           setStats(addStatsForCompletedGame(stats, guesses.length + 1))
         }
         sendScore(
@@ -382,13 +461,25 @@ function App() {
     )
   }
 
+  const formatLink = (text: string, href: string) => {
+    return `<a href="${href}" class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank">${text}</a>`
+  }
+
+  const youtubeChannelLink = 'https://www.youtube.com/@wangle0'
+  const promoText = `[...]<br/> \
+      [...] ${formatLink('YouTube channel', youtubeChannelLink)}!`
+
   return (
     <div className="h-screen flex flex-col">
       <Navbar
         setIsInfoModalOpen={setIsInfoModalOpen}
         setIsStatsModalOpen={setIsStatsModalOpen}
         setIsSettingsModalOpen={setIsSettingsModalOpen}
+        isPlayingRandom={isPlayingRandom}
+        dailyPath={dailyPath}
+        randomPath={randomPath}
       />
+      {/* <PromoText text={promoText} /> */}
       <div className="pt-2 px-1 pb-8 md:max-w-7xl w-full mx-auto sm:px-6 lg:px-8 flex flex-col grow">
         <div className="pb-6 grow">
           <Grid
@@ -397,6 +488,11 @@ function App() {
             currentGuess={currentGuess}
             isRevealing={isRevealing}
             currentRowClassName={currentRowClass}
+          />
+          <StopwatchText timeMs={timeMs} isSpeedrunMode={isSpeedrunMode} />
+          <RandomGameText
+            isPlayingRandom={isPlayingRandom}
+            isGameAnimationComplete={isSolutionTextOpen}
           />
         </div>
         <Keyboard
@@ -423,12 +519,21 @@ function App() {
           isGameLost={isGameLost}
           isGameWon={isGameWon}
           handleShareToClipboard={() => showSuccessAlert(GAME_COPIED_MESSAGE)}
+          handleMigrateStatsButton={() => {
+            setIsStatsModalOpen(false)
+            setIsMigrateStatsModalOpen(true)
+          }}
           isHardMode={isHardMode}
           isDarkMode={isDarkMode}
           isHighContrastMode={isHighContrastMode}
           numberOfGuessesMade={guesses.length}
           isPlayingExample={isPlayingExample}
+          isPlayingRandom={isPlayingRandom}
           isManualShareText={isManualShareText}
+        />
+        <MigrateStatsModal
+          isOpen={isMigrateStatsModalOpen}
+          handleClose={() => setIsMigrateStatsModalOpen(false)}
         />
         <SettingsModal
           isOpen={isSettingsModalOpen}
@@ -439,6 +544,8 @@ function App() {
           handleDarkMode={handleDarkMode}
           isHighContrastMode={isHighContrastMode}
           handleHighContrastMode={handleHighContrastMode}
+          isSpeedrunMode={isSpeedrunMode}
+          handleSpeedrunMode={handleSpeedrunMode}
           isManualShareText={isManualShareText}
           handleManualShareText={handleManualShareText}
         />

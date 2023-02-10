@@ -8,6 +8,6 @@ listed on the keyboard.
 All valid guesses must be words made from these bigrams as well. 
 (If you are on PC, try typing them out!)
 
-[**Play the daily game here!**](https://bigramleplus.herokuapp.com/)
+[**Play the daily game here!**](https://bigramleplus.netlify.app)
 
 This is one of the Wordle variants I have made. The other games and instructions for creating your own Wordle variant can be found [here](https://github.com/Compsciler/Wordle-With-Score-Database/).

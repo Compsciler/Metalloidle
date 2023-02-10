@@ -8,7 +8,7 @@ const webShareApiDeviceTypes: string[] = ['mobile', 'smarttv', 'wearable']
 const parser = new UAParser()
 const browser = parser.getBrowser()
 const device = parser.getDevice()
-const gameUrl = 'bigramleplus.herokuapp.com'
+const gameUrl = 'bigramleplus.netlify.app'
 
 export const shareStatus = (
   solution: string,

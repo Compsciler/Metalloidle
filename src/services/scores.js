@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseUrl = 'https://bigramle.herokuapp.com/api/scores'
+const baseUrl = 'https://wordlebackend.herokuapp.com/bigramle/api/scores'
 
 /*
 const getAll = () => {
